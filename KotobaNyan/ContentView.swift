@@ -66,6 +66,10 @@ struct VocabularyCardView: View {
                 Text(item.kanji.isEmpty ? item.kana : item.kanji)
                     .font(.title)
                     .bold()
+                    .onTapGesture {
+                        let text = item.kanji.isEmpty ? item.kana : item.kanji
+                        SpeechManager.shared.speak(text: text)
+                    }
                 Spacer()
                 Text(item.romaji)
                     .font(.subheadline)
