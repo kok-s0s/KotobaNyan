@@ -6,6 +6,11 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		FD825F952E6998CD0018C75E /* SQLite in Frameworks */ = {isa = PBXBuildFile; productRef = FD825F942E6998CD0018C75E /* SQLite */; };
+		FD825F972E699A030018C75E /* scene.csv in Resources */ = {isa = PBXBuildFile; fileRef = FD825F962E699A030018C75E /* scene.csv */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXContainerItemProxy section */
 		FD5EF16E2E6699E100F127A2 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -27,6 +32,7 @@
 		FD5EF1602E6699DF00F127A2 /* KotobaNyan.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = KotobaNyan.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		FD5EF16D2E6699E100F127A2 /* KotobaNyanTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = KotobaNyanTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		FD5EF1772E6699E100F127A2 /* KotobaNyanUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = KotobaNyanUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		FD825F962E699A030018C75E /* scene.csv */ = {isa = PBXFileReference; lastKnownFileType = text; path = scene.csv; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -52,6 +58,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				FD825F952E6998CD0018C75E /* SQLite in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -75,6 +82,7 @@
 		FD5EF1572E6699DF00F127A2 = {
 			isa = PBXGroup;
 			children = (
+				FD825F962E699A030018C75E /* scene.csv */,
 				FD5EF1622E6699DF00F127A2 /* KotobaNyan */,
 				FD5EF1702E6699E100F127A2 /* KotobaNyanTests */,
 				FD5EF17A2E6699E100F127A2 /* KotobaNyanUITests */,
@@ -112,6 +120,7 @@
 			);
 			name = KotobaNyan;
 			packageProductDependencies = (
+				FD825F942E6998CD0018C75E /* SQLite */,
 			);
 			productName = KotobaNyan;
 			productReference = FD5EF1602E6699DF00F127A2 /* KotobaNyan.app */;
@@ -195,6 +204,9 @@
 			);
 			mainGroup = FD5EF1572E6699DF00F127A2;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				FD825F932E6998CD0018C75E /* XCRemoteSwiftPackageReference "SQLite" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = FD5EF1612E6699DF00F127A2 /* Products */;
 			projectDirPath = "";
@@ -212,6 +224,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				FD825F972E699A030018C75E /* scene.csv in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -558,6 +571,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		FD825F932E6998CD0018C75E /* XCRemoteSwiftPackageReference "SQLite" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/stephencelis/SQLite.swift";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 0.15.4;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		FD825F942E6998CD0018C75E /* SQLite */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = FD825F932E6998CD0018C75E /* XCRemoteSwiftPackageReference "SQLite" */;
+			productName = SQLite;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = FD5EF1582E6699DF00F127A2 /* Project object */;
 }
