@@ -9,13 +9,18 @@ import SwiftUI
 
 struct ContentView: View {
     var body: some View {
-        VStack {
-            Image(systemName: "globe")
-                .imageScale(.large)
-                .foregroundStyle(.tint)
-            Text("Hello, world!")
+        NavigationView {
+            VStack {
+                Text("Hello, World!")
+                NavigationLink("进入详情", destination: DetailView())
+            }
         }
-        .padding()
+    }
+}
+
+struct DetailView: View {
+    var body: some View {
+        Text("这是详情页面")
     }
 }
 
