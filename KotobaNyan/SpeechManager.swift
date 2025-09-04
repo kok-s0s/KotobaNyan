@@ -1,5 +1,5 @@
-import AVFoundation
 import Foundation
+import AVFoundation
 
 class SpeechManager {
     static let shared = SpeechManager()

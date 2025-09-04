@@ -23,6 +23,7 @@ struct VocabularyItem: Identifiable {
 class VocabularyViewModel: ObservableObject {
     @Published var items: [VocabularyItem] = []
     @Published var filteredItems: [VocabularyItem] = []
+    @Published var scenes: [String] = []
     init() {
         fetchAll()
     }
@@ -54,9 +55,11 @@ class VocabularyViewModel: ObservableObject {
                 )
             }
             self.filteredItems = self.items
+            self.scenes = Array(Set(self.items.map { $0.scene })).filter { !$0.isEmpty }.sorted()
         } catch {
             self.items = []
             self.filteredItems = []
+            self.scenes = []
         }
     }
     func search(prefix: String) {
@@ -73,6 +76,9 @@ class VocabularyViewModel: ObservableObject {
             item.english.lowercased().hasPrefix(p.lowercased())
         }
     }
+    func filteredSceneItems(scene: String) -> [VocabularyItem] {
+        items.filter { $0.scene == scene }
+    }
 }
 
 struct VocabularyCardView: View {
@@ -84,8 +90,14 @@ struct VocabularyCardView: View {
                     .font(.title)
                     .bold()
                     .onTapGesture {
-                        let text = item.kanji.isEmpty ? item.kana : item.kanji
-                        SpeechManager.shared.speak(text: text)
+                        // 优先朗读 kana，其次 romaji，最后 kanji
+                        if !item.kana.isEmpty {
+                            SpeechManager.shared.speak(text: item.kana)
+                        } else if !item.romaji.isEmpty {
+                            SpeechManager.shared.speak(text: item.romaji)
+                        } else {
+                            SpeechManager.shared.speak(text: item.kanji)
+                        }
                     }
                 Spacer()
                 Text(item.romaji)
@@ -124,23 +136,18 @@ struct ContentView: View {
     @State private var searchText: String = ""
     @State private var selectedItem: VocabularyItem? = nil
     @FocusState private var isSearchFocused: Bool
+    @State private var selectedScene: String? = nil
+    let gridColumns = [GridItem(.flexible(), spacing: 16), GridItem(.flexible(), spacing: 16)]
     var body: some View {
         NavigationView {
-            ZStack {
-                // 背景点击收起词卡和键盘
-                Color(.clear)
-                    .contentShape(Rectangle())
-                    .onTapGesture {
-                        isSearchFocused = false
-                        selectedItem = nil
-                    }
+            VStack(spacing: 0) {
+                // 搜索区
                 VStack(spacing: 0) {
-                    // 搜索框
                     TextField("输入词条前缀...", text: $searchText)
-                        .padding(10)
+                        .padding(14)
                         .background(Color(.systemGray6))
-                        .cornerRadius(8)
-                        .padding([.horizontal, .top])
+                        .cornerRadius(14)
+                        .padding([.horizontal, .top], 16)
                         .focused($isSearchFocused)
                         .submitLabel(.done)
                         .onChange(of: searchText) { newValue in
@@ -150,44 +157,126 @@ struct ContentView: View {
                         .onSubmit {
                             isSearchFocused = false
                         }
-                    // 匹配结果列表
-                    List(viewModel.filteredItems) { item in
-                        Button(action: {
-                            selectedItem = item
-                            isSearchFocused = false
-                        }) {
-                            HStack {
-                                VStack(alignment: .leading) {
-                                    Text(item.kanji.isEmpty ? item.kana : item.kanji)
-                                        .font(.headline)
-                                    Text(item.chinese)
-                                        .font(.subheadline)
-                                        .foregroundColor(.accentColor)
+                    if !searchText.trimmingCharacters(in: .whitespaces).isEmpty {
+                        List(viewModel.filteredItems) { item in
+                            Button(action: {
+                                selectedItem = item
+                                isSearchFocused = false
+                            }) {
+                                HStack {
+                                    VStack(alignment: .leading) {
+                                        Text(item.kanji.isEmpty ? item.kana : item.kanji)
+                                            .font(.headline)
+                                        Text(item.chinese)
+                                            .font(.subheadline)
+                                            .foregroundColor(.accentColor)
+                                    }
+                                    Spacer()
+                                    Text(item.scene)
+                                        .font(.caption)
+                                        .foregroundColor(.blue)
                                 }
-                                Spacer()
-                                Text(item.scene)
-                                    .font(.caption)
-                                    .foregroundColor(.blue)
                             }
                         }
-                    }
-                    .listStyle(.plain)
-                    // 释义卡片
-                    if let item = selectedItem {
-                        VStack {
-                            VocabularyCardView(item: item)
-                                .transition(.move(edge: .bottom))
-                                .padding(.bottom, 8)
-                            Button("收起词卡") {
-                                selectedItem = nil
+                        .listStyle(.plain)
+                        .frame(maxHeight: 300)
+                        // 释义卡片
+                        if let item = selectedItem {
+                            VStack {
+                                VocabularyCardView(item: item)
+                                    .transition(.move(edge: .bottom))
+                                    .padding(.bottom, 8)
+                                Button("收起词卡") {
+                                    selectedItem = nil
+                                }
+                                .padding(.bottom)
                             }
-                            .padding(.bottom)
                         }
                     }
                 }
+                // 分类栅格区（仅在搜索框为空时显示）
+                if searchText.trimmingCharacters(in: .whitespaces).isEmpty {
+                    ScrollView {
+                        LazyVGrid(columns: gridColumns, spacing: 14) {
+                            ForEach(viewModel.scenes, id: \ .self) { scene in
+                                NavigationLink(destination: SceneWordsView(scene: scene, viewModel: viewModel)) {
+                                    RoundedRectangle(cornerRadius: 24)
+                                        .fill(Color.accentColor.opacity(0.18))
+                                        .frame(height: 120)
+                                        .shadow(color: Color(.systemGray3), radius: 6, x: 0, y: 2)
+                                        .overlay(
+                                            GeometryReader { geometry in
+                                                HStack {
+                                                    Spacer(minLength: 0)
+                                                    VStack {
+                                                        Spacer(minLength: 0)
+                                                        Text(scene)
+                                                            .font(.title3)
+                                                            .bold()
+                                                            .foregroundColor(.accentColor)
+                                                            .multilineTextAlignment(.center)
+                                                            .padding(.horizontal, 12)
+                                                            .padding(.top, 24) // 让文本整体向下偏移
+                                                        Spacer(minLength: 0)
+                                                    }
+                                                    .frame(height: geometry.size.height)
+                                                    Spacer(minLength: 0)
+                                                }
+                                            }
+                                        )
+                                }
+                            }
+                        }
+                        .padding(.horizontal, 12)
+                        .padding(.vertical, 16)
+                    }
+                }
+                Spacer()
             }
-            .navigationTitle("词条搜索")
+            .navigationTitle("场景分类与搜索")
         }
+    }
+}
+
+struct SceneWordsView: View {
+    let scene: String
+    @ObservedObject var viewModel: VocabularyViewModel
+    @State private var selectedItem: VocabularyItem? = nil
+    var body: some View {
+        VStack {
+            List(viewModel.filteredSceneItems(scene: scene)) { item in
+                Button(action: {
+                    selectedItem = item
+                }) {
+                    HStack {
+                        VStack(alignment: .leading) {
+                            Text(item.kanji.isEmpty ? item.kana : item.kanji)
+                                .font(.headline)
+                            Text(item.chinese)
+                                .font(.subheadline)
+                                .foregroundColor(.accentColor)
+                        }
+                        Spacer()
+                        Text(item.romaji)
+                            .font(.caption)
+                            .foregroundColor(.gray)
+                    }
+                }
+            }
+            .listStyle(.plain)
+            if let item = selectedItem {
+                VStack {
+                    VocabularyCardView(item: item)
+                        .transition(.move(edge: .bottom))
+                        .padding(.bottom, 8)
+                    Button("收起词卡") {
+                        selectedItem = nil
+                    }
+                    .padding(.bottom)
+                }
+            }
+        }
+        .navigationTitle(scene)
     }
 }
 
