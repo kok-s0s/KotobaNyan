@@ -12,9 +12,11 @@ struct KotobaNyanApp: App {
     init() {
         DatabaseManager.shared.importCSVIfNeeded()
     }
+    @AppStorage("appTheme") private var appTheme: String = AppTheme.system.rawValue
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            JishoSearchView()
+                .preferredColorScheme(AppTheme(rawValue: appTheme)?.colorScheme)
         }
     }
 }
